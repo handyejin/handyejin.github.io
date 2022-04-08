@@ -21,10 +21,10 @@
 title: 손코딩
 email: handyejin@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  손예진의 코딩일기
+  손예진의 개발 블로그
 # baseurl: "/" # the subpath of your site, e.g. /blog
 # url: "http://ejjoo.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-github_username: ejjoo
+github_username: handyejin
 highlighter: rouge
 svg:
   optimize: true
