@@ -121,13 +121,15 @@ code {
 }
 
 .sidebar-brand > a {
-  font-size: 300%;
+  /* margin-left: 10px; */
+  font-size: 250%;
   font-family: "Gelasio";
   color: #fff;
 }
 
 .lead {
-  font-size: 120%;
+  margin-left: 4px;
+  font-size: 110%;
   color: #aaa;
 }
 
