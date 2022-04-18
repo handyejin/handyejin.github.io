@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 자바 다형성
+title: 자바 다형성(Polymorphism)
 date: 2022-04-18
 category: JAVA
 ---
