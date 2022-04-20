@@ -12,12 +12,21 @@ category: Algorithm
 ## 문제
 
 한 개의 문장이 주어지면 그 문장 속에서 가장 긴 단어를 출력하는 프로그램을 작성하세요.
-<br><br>
+<br>
+
+#### 예시 입력
+
+<h5 style = "margin-top:3px; margin-left:2px;">
+	it is time to study
+</h5>
+
+#### 예시 출력
+
+<h5 style = "margin-top:3px; margin-left:2px;">study</h5>
 
 ## 풀이
 
 ```java
-
 import java.util.Scanner;
 
 public class Main {
@@ -47,7 +56,6 @@ public class Main {
         System.out.println(main.solution(str));
     }
 }
-
 ```
 
 ### indexOf(),substring() 이용한 방법

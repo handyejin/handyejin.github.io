@@ -13,6 +13,17 @@ category: Algorithm
 
 한 개의 문자열을 입력받고, 특정 문자를 입력받아 해당 특정문자가 입력받은 문자열에 몇 개 존재하는지 알아내는 프로그램을 작성하세요.
 
+#### 예시 입력
+
+<h5 style = "margin-top:3px; margin-left:2px;">
+	Computercooler<br>
+	c
+</h5>
+
+#### 예시 출력
+
+<h5 style = "margin-top:3px; margin-left:2px;">2</h5>
+
 ## 풀이
 
 ```java
@@ -74,5 +85,4 @@ class Main{
 		System.out.print(T.solution(str, c));
 	}
 }
-
 ```

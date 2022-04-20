@@ -14,6 +14,17 @@ category: Algorithm
 대문자와 소문자가 같이 존재하는 문자열을 입력받아 대문자는 소문자로 소문자는 대문자로 변환하여 출력하는 프로그램을 작성하세요.
 <br><br>
 
+#### 예시 입력
+
+<h5 style = "margin-top:3px; margin-left:2px;">
+	StuDY
+
+</h5>
+
+#### 예시 출력
+
+<h5 style = "margin-top:3px; margin-left:2px;">sTUdy</h5>
+
 ## 풀이
 
 ```java
@@ -44,7 +55,6 @@ public class Main {
 
     }
 }
-
 ```
 
 <br>
@@ -78,6 +88,4 @@ public class Main {
         System.out.println(main.solution(str));
     }
 }
-
-
 ```
