@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 연속된 자연수의 합
-date: 2022-04-25
+date: 2022-04-25 10:05:01
 category: Algorithm
 ---
 

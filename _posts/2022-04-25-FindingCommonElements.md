@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 공통원소 구하기
-date: 2022-04-25
+date: 2022-04-25 10:01:01
 category: Algorithm
 ---
 

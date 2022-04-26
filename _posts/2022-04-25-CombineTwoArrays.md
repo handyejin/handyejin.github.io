@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 두 배열 합치기
-date: 2022-04-25
+date: 2022-04-25 10:00:01
 category: Algorithm
 ---
 
