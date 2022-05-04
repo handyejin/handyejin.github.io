@@ -3,7 +3,6 @@ layout: post
 title: 자바 상속
 date: 2022-04-10
 category: JAVA
-order: 2
 ---
 
 # 상속(Inheritance)
