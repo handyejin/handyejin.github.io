@@ -1,7 +1,7 @@
 ---
 layout: post
-title: 프로젝트 생성, 라이브러리 살펴보기, View 환경 설정
-date: 2022-05-16
+title: Spring 프로젝트 생성, 라이브러리 살펴보기, View 환경 설정
+date: 2022-05-16 03:19:00
 category: Spring
 ---
 
