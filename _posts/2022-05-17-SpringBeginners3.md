@@ -82,6 +82,7 @@ public class MemberService {
 public class MemoryMemberRepository implements MemberRepository{}
 ```
 
+<div style="height:4px"></div>
 # 스프링 빈을 등록하는 2가지 방법
 
 - 컴포넌트 스캔과 자동 의존관계 설정
@@ -96,3 +97,109 @@ public class MemoryMemberRepository implements MemberRepository{}
 <div style="height:4px"></div>
 
 > 스프링은 스프링 컨테이너에 스프링 빈을 등록할 때 **싱글톤**으로 등록한다.(유일하게 하나만 등록해서 공유한다)<br> 따라서 같은 스프링빈이면 모두 같은 인스턴스다.
+
+<div style="height:12px"></div>
+
+# 자바 코드로 직접 스프링 빈 등록하기
+
+회원 리포지토리와 회원 서비스의 `@Service`, `@Repository`, `@Autowired` 애노테이션을 제거하고 진행한다.
+
+- `SpringConfig.java`를 만들고 해당 클래스를 `Configuration`으로 선언한다. <br>
+  그리고 등록할 인스턴스를 `@Bean`으로 선언해 스프링 빈을 등록한다.
+
+  ```java
+  package hello.hellospring;
+
+
+  import hello.hellospring.repository.MemberRepository;
+  import hello.hellospring.repository.MemoryMemberRepository;
+  import hello.hellospring.service.MemberService;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+
+  @Configuration
+  public class SpringConfig {
+
+
+      @Bean//스프링 빈을 등록한다는 의미
+      public MemberService memberService(){
+          return new MemberService(memberRepository());
+      }
+
+      @Bean
+      public MemberRepository memberRepository(){
+          return new MemoryMemberRepository();
+      }
+  }
+  ```
+
+  - 메소드의 리턴 객체들이 스프링 빈으로 스프링 컨테이너에 등록된다.
+  - MemberService는 memberRepository()에서 등록된 MemoryMemberRepsitory()를 사용한다. <br>
+    즉, 스피링 빈에 등록된 컴포넌트를 사용하는 것 이므로 `@Autowired`와 같은 기능을 한다.
+
+### DI 방식
+
+- **DI**(의존관계 주입)에는 **필드 주입, setter주입, 생성자 주입** 이렇게 3가지 방법이 있다.
+
+  ##### 필드 주입
+
+  ```java
+  @Controller
+  public class MemberController {
+      @Autowired private  MemberService memberService;
+  }
+  }
+  ```
+
+  - 변경에 유연하지 못하다는 단점이 있다.
+
+  ##### setter 주입
+
+  ```java
+  private  MemberService memberService;
+
+  @Autowired
+  public void setMemberService(MemberService memberService){
+      this.memberService = memberService;
+  ```
+
+  - setter가 public이어야 한다는 특징 때문에 외부에 노출된다는 단점이 있다.
+
+  ##### 생성자 주입
+
+  ```java
+      private final MemberService memberService;
+
+      @Autowired
+      public MemberController(MemberService memberService) {
+          this.memberService = memberService;
+      }
+  ```
+
+  - 스프링 컨테이너에서 애플리케이션이 조립되는 시점에, 객체가 생성되며 한 번 주입한다.
+  - 객체 생성 시점 이외에 변경할 수 없도록 막을 수 있다.
+
+  <div style="height:12px"></div>
+
+## 요약
+
+#### 어노테이션 활용 경우
+
+1. 스프링 컨테이너가 동작할 때 먼저 컴포넌트 스캔 진행
+2. `@Component` 어노테이션이 달린 클래스를 찾아 빈으로 등록(Service, Controller, Repository 등)
+3. `@Autowired`을 찾아 의존성 주입을 수행
+4. `MemberController`에 `MemberService`가 `@Autowired`로 되어있으므로, 컨테이너에 빈으로 올라가 있는 `MemberService`주입
+5. `MemerService`에 `Repository`부분이 `Autowired`이므로, 컨테이너 빈으로 올라간 `Repository` 주입
+
+#### springConfig를 통해 자바코드로 할 경우
+
+1. 컴포넌트 스캔이 진행 - `@Configuration` 어노테이션에 `@Component`가 포함되어 있음.
+2. `springConfig`를 통해 `MemberService`,` MemberRepository`가 `Bean`으로 등록
+3. `MemberService`에 아래 코드로 인해서 `MemberService`와 `MemberReposiroty`는 의존성이 존재하고, `MemberService`에 `MemberRepository`를 주입
+
+   ```java
+   return new MemberService(memberRepository());
+   ```
+
+4. `MemberController` 등록
+5. `@Autowired`를 통해 `memberService`를 등록해야 함.
