@@ -83,20 +83,23 @@ public class MemoryMemberRepository implements MemberRepository{}
 ```
 
 <div style="height:4px"></div>
+
 # 스프링 빈을 등록하는 2가지 방법
 
 - 컴포넌트 스캔과 자동 의존관계 설정
-  - `@Component` 어노테이션이 있으면 스프링 빈으로 자동 등록된다.
-  - `@Component`를 포함하는 어노테이션도 스프링 빈으로 자동 등록된다.
-    - `@Controller`
-    - `@Service`
-    - `@Repository`
 
-> 스프링이 컴포넌트를 스캔할 때 `@SpringBootApplication` 클래스의 패키지 및 하위 패키지의 파일들만 스캔
+  - `@Component` 어노테이션이 있으면 스프링 빈으로 자동 등록된다.
+  - `@Component`를 포함하는 어노테이션도 스프링 빈으로 자동 등록된다. - `@Controller` - `@Service` - `@Repository`
+
+  > 스프링이 컴포넌트를 스캔할 때 `@SpringBootApplication` 클래스의 패키지 및 하위 패키지의 파일들만 스캔
+
+  > 스프링은 스프링 컨테이너에 스프링 빈을 등록할 때 **싱글톤**으로 등록한다.(유일하게 하나만 등록해서 공유한다)<br> 따라서 같은 스프링빈이면 모두 같은 인스턴스다.
+
+  <div style="height:9px"></div>
+
+- 자바 코드로 직접 스프링 빈 등록하기
 
 <div style="height:4px"></div>
-
-> 스프링은 스프링 컨테이너에 스프링 빈을 등록할 때 **싱글톤**으로 등록한다.(유일하게 하나만 등록해서 공유한다)<br> 따라서 같은 스프링빈이면 모두 같은 인스턴스다.
 
 <div style="height:12px"></div>
 
