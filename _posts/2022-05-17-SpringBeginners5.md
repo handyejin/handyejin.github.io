@@ -314,3 +314,324 @@ public class MemberServiceIntegrationTest {
 이에반해, **통합테스트** 는 스프링도 띄우고 DB도 연동하여 진행하는 테스트이다.
 
 - **보통 순수한 단위테스트가 더 좋은 테스트일 확률이 높다.**
+
+<div style="height:24px;"></div>
+
+# 스프링 JdbcTemplate
+
+- 순수 Jdbc와 동일하게 환경설정을 한다.
+- 스프링 JdbcTemplate과 MyBatis같은 라이브러리는 JDBC API에서 본 반복 코드를 대부분 제거해준다.
+- 하지만 SQL문은 직접 작성해야 한다.
+
+##### 스프링 JdbcTemplate 회원 레포지토리
+
+```java
+package hello.hellospring.repository;
+
+import hello.hellospring.domain.Member;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+public class JdbcTemplateMemberRepository implements MemberRepository{
+
+    private final JdbcTemplate jdbcTemplate;
+
+    //생성자가 1개만 있으면 autowired생략 가능
+    @Autowired
+    public JdbcTemplateMemberRepository(DataSource dataSource) {
+        jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    @Override
+    public Member save(Member member) {
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName("member").usingGeneratedKeyColumns("id");
+
+        Map<String,Object> parameters = new HashMap<>();
+        parameters.put("name",member.getName());
+
+        Number key = jdbcInsert.executeAndReturnKey(new MapSqlParameterSource(parameters));
+        member.setId(key.longValue());
+        return member;
+    }
+
+    @Override
+    public Optional<Member> findById(Long id) {
+//        return Optional.empty();
+        List<Member> result =  jdbcTemplate.query("select * from member where id= ?", memberRowMapper(),id);
+        //Optional로 바꿔서 반환.
+        return result.stream().findAny();
+    }
+
+    @Override
+    public Optional<Member> findByName(String name) {
+        List<Member> result = jdbcTemplate.query("select * from member where name = ?",memberRowMapper(),name);
+        return result.stream().findAny();
+    }
+
+    @Override
+    public List<Member> findAll() {
+        return jdbcTemplate.query("select * from member",memberRowMapper());
+    }
+
+    private RowMapper<Member> memberRowMapper(){
+        return (rs, rowNum)->{
+            Member member = new Member();
+            member.setId(rs.getLong("id"));
+            member.setName(rs.getString("name"));
+            return member;
+        };
+    }
+}
+```
+
+- 생성자에서 JdbcTemplate 대신 DataSource를 인젝션 받는다.
+- JdbcTemplate를 생성할 때도 dataSource를 인젝션 받는다.
+
+  ```java
+  List<Member> result =  jdbcTemplate.query(sql,결과,파라미터);
+  ```
+
+<div style="height:4px;"></div>
+
+##### JdbcTemplate 을 사용하도록 스프링 설정 변경
+
+```java
+@Configuration
+public class SpringConfig {
+
+    private final DataSource dataSource;
+
+    public SpringConfig(DataSource dataSource) {
+        this.dataSource = dataSource;
+}
+
+    @Bean
+    public MemberRepository memberRepository() {
+    // return new MemoryMemberRepository();
+    // return new JdbcMemberRepository(dataSource);
+    return new JdbcTemplateMemberRepository(dataSource);
+    }
+}
+```
+
+<div style="height:24px;"></div>
+
+# JPA
+
+- **JPA**는 기존의 반복 코드는 물론이고, 기본적인 SQL도 JPA가 직접 만들어서 실행해준다.
+
+  - 스프링 JdbcTemplate을 사용해 반복 코드는 줄었지만, SQL문은 직접 작성해야한다. JPA를 사용하면 SQL문을 직접 작성하지 않아도 된다.
+  - CRUD기능의 SQL문을 직접 작성할 필요가 없다.
+
+  <div style="height:10px;"></div>
+
+- JPA를 사용하면, SQL과 데이터 중심의 설계에서 객체 중심의 설계로 패러다임을 전환을 할 수 있다.
+
+  <div style="height:10px;"></div>
+
+- JPA를 사용하면 개발 생산성을 크게 높일 수 있다.
+
+#### build.gradle 파일에 JPA, h2 데이터베이스 관련 라이브러리 추가
+
+```java
+implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+runtimeOnly 'com.h2database:h2'
+```
+
+  <div style="height:6px;"></div>
+
+#### 스프링 부트에 JPA 설정 추가
+
+```java
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=none
+```
+
+- **`show-sql`**: JPA가 생성하는 SQL을 출력
+- **`ddl-auto`**: JPA는 테이블을 자동으로 생성하는 기능을 제공한다.
+  - **`none`**: 해당 기능 끔
+  - **`create`**: 엔티티 정보를 바탕으로 테이블 직접 생성
+
+##### JPA 엔티티 매핑
+
+```java
+package hello.hellospring.domain;
+
+import javax.persistence.*;
+
+//ORM
+
+@Entity //jpa가 관리하는 엔티티
+public class Member {
+
+    //시스템이 저장하는 id값
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) //db가 id를 자동으로 생성해주는 것을 identity전략이라고한다.
+    private Long id;
+
+    @Column(name = "name")
+    private String name;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
+
+- JPA를 사용하기 위해 엔티티 Entity를 맵핑 해야함
+- JPA 는 **ORM**(Object Relational Mapping) 기술을 사용
+  - **ORM**: 객체(Object)와 관계형(Relational) 데이터베이스의 테이블을 맵핑(Mapping)하는 기술
+- 자바 코드에 선언한 어노테이션들을 보고, 괒계형 데이터베이스의 요소와 비교
+
+<div style="height:6px;"></div>
+
+- <span style="font-size:20px;">**`@Entity`**</span> - 해당 클래스 객체는 JPA가 관리하는 Entity가 된다.
+- <span style="font-size:20px;">**`@Id`**</span> - SQL에서 선언한 `generated by default as identity`처럼, DB가 자동으로 생성해주는 값에 선언한다.
+
+<div style="height:6px;"></div>
+
+#### JPA 회원 리포지토리
+
+```java
+package hello.hellospring.repository;
+
+import hello.hellospring.domain.Member;
+
+import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.Optional;
+
+public class JpaMemberRepository implements MemberRepository{
+
+    //jpa는 EntityManager로 동작한다.
+    //jpa를 쓰기 위해서 EntityManager을 주입 받아야한다.
+    private final EntityManager em;
+
+    public JpaMemberRepository(EntityManager em) {
+        this.em = em;
+    }
+
+    @Override
+    public Member save(Member member) {
+        em.persist(member);
+        return member;
+    }
+
+    @Override
+    public Optional<Member> findById(Long id) {
+        //find(조회할 타입, 식별자)
+        Member member =  em.find(Member.class, id);
+        return Optional.ofNullable(member);
+    }
+
+    @Override
+    public Optional<Member> findByName(String name) {
+        // 값 찾을 때 :name 붙이기
+        List<Member> result =  em.createQuery("select m from Member m where m.name = :name",Member.class)
+                .setParameter("name",name)
+                .getResultList();
+
+        return result.stream().findAny();
+    }
+
+    @Override
+    public List<Member> findAll() {
+        //객체를 대상으로 쿼리문을 날린다.
+        // member객체 자체를 select하기 때문에 m으로 써도된다.
+        return em.createQuery("select m from Member m", Member.class)
+                .getResultList();
+    }
+}
+```
+
+- **EntityManager**
+
+  - JPA는 **`EntityManager`**로 동작한다. 반드시 선언해주어야한다.
+  - `build.gradle`에서 `data-jpa`를 설정해 두면, 스프링 부트가 자동으로 `EntityManager`을 만들어 설정한 DB와 통신을 편하게해준다.
+
+    <div style="height:6px;"></div>
+
+- **persist(e)**
+  - DB에 해당 요소를 영속적으로 저장
+    <div style="height:6px;"></div>
+- **find(조회할 타입, PK)**
+
+  - DB테이블에서 해당 타입에 `PK`를 갖는 요소를 찾아옴
+
+     <div style="height:6px;"></div>
+
+- **createQuery("JPQL쿼리문", 타입)**
+
+  - `PK`를 사용하지 않고 조회할 때 `createQuery`를 사용해 **`JPQL`**을 작성해야한다.
+
+  <div style="height:8px;"></div>
+
+- **JPQL**
+  - 객체(엔티티)를 대상으로 쿼리문을 보낸다.
+
+<div style="height:8px;"></div>
+
+#### 서비스 계층에 트랜잭션 추가
+
+```java
+import org.springframework.transaction.annotation.Transactional
+
+@Transactional
+public class MemberService {}
+```
+
+- `org.springframework.transaction.annotation.Transactional`을 사용
+- 스프링은 해당 클래스의 메서드를 실행할 때 트랜잭션을 시작하고, 메서드가 정상 종료되면 트랜잭션을 커밋한다. 만약 런타임 예외가 발생하면 롤백한다.
+- JPA를 통한 모든 데이터 변경은 트랜잭션 안에서 실행해야 한다.
+
+<div style="height:6px;"></div>
+
+#### JPA를 사용하도록 스프링 설정 변경
+
+```java
+package hello.hellospring;
+
+
+import hello.hellospring.repository.*;
+import hello.hellospring.service.MemberService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import javax.persistence.EntityManager;
+import javax.sql.DataSource;
+
+@Configuration
+public class SpringConfig {
+
+    private EntityManager em;
+
+    public MemberRepository memberRepository(){
+        return new JpaMemberRepository(em);
+    }
+}
+```
