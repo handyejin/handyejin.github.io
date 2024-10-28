@@ -34,6 +34,8 @@ highlighter-theme: monokai
 date_format: "%Y-%M-%D"
 plugins:
   - jekyll-feed
+language: ["en", "ko"]
+default_lang: "ko"
 category_dir: category/
 tag_dir: tag/
 markdown: kramdown
